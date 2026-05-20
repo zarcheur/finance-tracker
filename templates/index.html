@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Finance Tracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            color: #f8fafc;
+        }
+
+        p.subtitle {
+            color: #94a3b8;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 16px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            color: #e2e8f0;
+            font-size: 1rem;
+            resize: none;
+            height: 100px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        textarea:focus { border-color: #6366f1; }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        button:hover { opacity: 0.85; }
+
+        #parseBtn { background: #6366f1; color: white; }
+        #logBtn { background: #22c55e; color: white; display: none; }
+
+        .result-card {
+            margin-top: 24px;
+            background: #0f172a;
+            border-radius: 10px;
+            padding: 20px;
+            display: none;
+            border: 1px solid #334155;
+        }
+
+        .result-card h3 {
+            margin-bottom: 16px;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #1e293b;
+            font-size: 0.95rem;
+        }
+
+        .result-row:last-child { border-bottom: none; }
+        .result-label { color: #94a3b8; }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .income { background: #166534; color: #86efac; }
+        .expense { background: #7f1d1d; color: #fca5a5; }
+        .unknown { background: #334155; color: #94a3b8; }
+
+        .status-msg {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 0.95rem;
+            min-height: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 Finance Tracker</h1>
+        <p class="subtitle">Type your transaction in plain English</p>
+
+        <textarea id="inputText" placeholder="e.g. I received 25 pesos today from my parents"></textarea>
+
+        <button id="parseBtn" onclick="parseInput()">🔍 Analyse</button>
+
+        <div class="result-card" id="resultCard">
+            <h3>📊 Parsed Result</h3>
+            <div class="result-row">
+                <span class="result-label">Amount</span>
+                <span id="resAmount">—</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Type</span>
+                <span id="resType">—</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Category</span>
+                <span id="resCategory">—</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Description</span>
+                <span id="resDescription">—</span>
+            </div>
+        </div>
+
+        <button id="logBtn" onclick="logTransaction()">✅ Log to Google Sheets</button>
+
+        <div class="status-msg" id="statusMsg"></div>
+    </div>
+
+    <script>
+        let parsedData = null;
+
+        async function parseInput() {
+            const text = document.getElementById("inputText").value.trim();
+            if (!text) return;
+
+            document.getElementById("statusMsg").textContent = "Analysing...";
+
+            const response = await fetch("/parse", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text })
+            });
+
+            parsedData = await response.json();
+
+            document.getElementById("resAmount").textContent = "₱" + parsedData.amount;
+            document.getElementById("resCategory").textContent = parsedData.category;
+            document.getElementById("resDescription").textContent = parsedData.description;
+
+            const typeEl = document.getElementById("resType");
+            typeEl.innerHTML = `<span class="badge ${parsedData.type}">${parsedData.type}</span>`;
+
+            document.getElementById("resultCard").style.display = "block";
+            document.getElementById("logBtn").style.display = "block";
+            document.getElementById("statusMsg").textContent = "";
+        }
+
+        async function logTransaction() {
+            document.getElementById("statusMsg").textContent = "Logging...";
+
+            const response = await fetch("/log", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(parsedData)
+            });
+
+            const result = await response.json();
+
+            if (result.status === "success") {
+                document.getElementById("statusMsg").textContent = "✅ Logged successfully!";
+                document.getElementById("logBtn").style.display = "none";
+                document.getElementById("inputText").value = "";
+                setTimeout(() => {
+                    document.getElementById("resultCard").style.display = "none";
+                    document.getElementById("statusMsg").textContent = "";
+                }, 3000);
+            }
+        }
+    </script>
+</body>
+</html>
