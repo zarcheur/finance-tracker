@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finance Tracker</title>
 
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicon_io/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon_io/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon_io/favicon-16x16.png">
-    <link rel="manifest" href="/favicon_io/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="../favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon_io/favicon-16x16.png">
+    <link rel="manifest" href="../favicon_io/site.webmanifest">
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -35,8 +35,15 @@
 
         h1 {
             font-size: 1.8rem;
-            margin-bottom: 8px;
             color: #f8fafc;
+            margin-left: 10px;
+        }
+
+        .logo-container{
+            display: flex;
+            justify-content: left;
+            align-items: center;
+            margin-bottom: 8px;
         }
 
         p.subtitle {
@@ -121,21 +128,25 @@
             margin-top: 16px;
             text-align: center;
             font-size: 0.95rem;
-            min-height: 24px;
+            min-height: 12px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>💰 Finance Tracker</h1>
-        <p class="subtitle">Type your transaction in plain English</p>
+        <div class="logo-container">
+            <img src="../favicon_io/favicon-32x32.png" alt="Favicon">
+            <h1>Finance Tracker</h1>
+        </div>
+        
+        <p class="subtitle">Type your transaction for today!</p>
 
-        <textarea id="inputText" placeholder="e.g. I received 25 pesos today from my parents"></textarea>
+        <textarea id="inputText" placeholder="e.g. I received 500 pesos today from my parents"></textarea>
 
-        <button id="parseBtn" onclick="parseInput()">🔍 Analyse</button>
+        <button id="parseBtn" onclick="parseInput()">🔍 Analyze</button>
 
         <div class="result-card" id="resultCard">
-            <h3>📊 Parsed Result</h3>
+            <h3>📊 Interpreted Result</h3>
             <div class="result-row">
                 <span class="result-label">Amount</span>
                 <span id="resAmount">—</span>
@@ -166,7 +177,7 @@
             const text = document.getElementById("inputText").value.trim();
             if (!text) return;
 
-            document.getElementById("statusMsg").textContent = "Analysing...";
+            document.getElementById("statusMsg").textContent = "Analyzing...";
 
             const response = await fetch("/parse", {
                 method: "POST",
@@ -176,7 +187,10 @@
 
             parsedData = await response.json();
 
-            document.getElementById("resAmount").textContent = "₱" + parsedData.amount;
+            document.getElementById("resAmount").textContent = "₱" + parsedData.amount.toLocaleString("en-PH", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
             document.getElementById("resCategory").textContent = parsedData.category;
             document.getElementById("resDescription").textContent = parsedData.description;
 

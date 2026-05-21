@@ -8,7 +8,7 @@ EXPENSE_VERBS = ["spend", "pay", "buy", "purchase", "use"]
 CATEGORIES = {
     "allowance": ["parent", "mom", "dad", "family", "allowance"],
     "food": ["food", "lunch", "dinner", "breakfast", "snack", "drink", "cafe", "restaurant"],
-    "transport": ["fare", "jeep", "bus", "grab", "tric", "tricycle", "train", "lrt", "transport", "ride"],
+    "transportation": ["fare", "jeep", "bus", "grab", "tric", "tricycle", "train", "lrt", "transpo", "ride"],
     "shopping": ["bought", "shop", "mall", "store", "online"],
     "bills": ["bill", "electric", "water", "wifi", "internet", "rent"],
 }
@@ -17,7 +17,8 @@ def extract_amount(doc):
     for token in doc:
         if token.pos_ == "NUM":
             try:
-                return float(token.text)
+                cleaned = token.text.replace(",", "")
+                return float(cleaned)
             except ValueError:
                 continue
     return None

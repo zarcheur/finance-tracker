@@ -28,6 +28,10 @@ def post_to_sheety(parsed_data):
         }
     }
 
+    print(f"Endpoint: {SHEETY_ENDPOINT}")
+    print(f"Header: {HEADER}")
+    print(f"Payload: {payload}")
+
     response = requests.post(SHEETY_ENDPOINT, json=payload, headers=HEADER)
 
     if response.status_code == 200:
