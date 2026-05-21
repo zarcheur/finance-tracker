@@ -12,7 +12,7 @@ SHEETY_ENDPOINT = f"https://api.sheety.co/{TOKEN}/{PROJECT_NAME}/{SHEET_NAME}"
 HEADER = {"Authorization": f"Basic {os.environ.get('AUTH_TOKEN')}"}
 
 def post_to_sheety(parsed_data):
-    today = datetime.now().strftime("%d/%m/%Y")
+    today = datetime.now().strftime("%m/%d/%Y")
 
     amount = parsed_data["amount"]
     if parsed_data["type"] == "expense":
